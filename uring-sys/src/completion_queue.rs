@@ -37,7 +37,7 @@ impl<'a> Iterator for CompletedIter<'a> {
         } else {
             let index = self.0.head & self.0.k_ring_mask;
             let mem_offset = index as usize * core::mem::size_of::<CompletionQueueEntry>();
-            let cqe = unsafe { self.0.k_completion_queue_entries.offset(mem_offset as isize) as *mut CompletionQueueEntry };
+            let cqe = unsafe { self.0.k_completion_queue_entries.offset(mem_offset as isize) as usize as *mut CompletionQueueEntry };
             self.0.head = self.0.head.wrapping_add(1);
 
             if cqe == core::ptr::null_mut() {
