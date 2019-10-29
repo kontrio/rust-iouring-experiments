@@ -1,0 +1,5 @@
+[workspace]
+members = [
+  "uring-sys",
+  "uring",
+]

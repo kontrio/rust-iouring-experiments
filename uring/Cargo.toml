@@ -1,0 +1,10 @@
+[package]
+name = "uring"
+version = "0.1.0"
+authors = ["samgiles"]
+edition = "2018"
+
+[dependencies]
+tokio = "0.2.0-alpha.6"
+uring-sys = { path = "../uring-sys" }
+libc = "*"
