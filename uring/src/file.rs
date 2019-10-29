@@ -2,7 +2,7 @@
 mod test {
     use std::fs::OpenOptions;
     use std::os::unix::io::IntoRawFd;
-    use uring_sys::{FileDescriptor, IOPriority, IoUringBuilder, ReadWriteFlags};
+    use uring_sys::{FileDescriptor, IOPriority, IoUringBuilder};
 
     fn iovec_from(data: &[u8]) -> libc::iovec {
         libc::iovec {
@@ -34,7 +34,7 @@ mod test {
         ];
         let offset = 0;
 
-        let user_data = 0xFACADEFACADEFAFA;
+        let user_data = 0xFACA_DEFA_CADE_FAFA;
         let rw_flags = Default::default();
         let mut sqe = uring.new_submission().unwrap();
         unsafe {
@@ -80,7 +80,7 @@ mod test {
         ];
         let offset = 0;
 
-        let user_data = 0xFACADEFACADEFAFA;
+        let user_data = 0xFACA_DEFA_CADE_FAFA;
         let rw_flags = Default::default();
         let mut sqe = uring.new_submission().unwrap();
         unsafe {

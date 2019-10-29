@@ -35,8 +35,7 @@ impl<'a> Iterator for CompletedIter<'a> {
             let mem_offset = index as usize * core::mem::size_of::<CompletionQueueEntry>();
             let cqe = unsafe {
                 self.0
-                    .k_completion_queue_entries
-                    .offset(mem_offset as isize) as usize
+                    .k_completion_queue_entries.add(mem_offset) as usize
                     as *mut CompletionQueueEntry
             };
             self.0.head = self.0.head.wrapping_add(1);

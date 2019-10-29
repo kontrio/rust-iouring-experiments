@@ -31,7 +31,7 @@ impl MappedMemory {
     }
 
     pub fn get_offset<T>(&self, offset: usize) -> *mut T {
-        unsafe { self.addr.offset(offset as isize) as *mut T }
+        unsafe { self.addr.add(offset) as *mut T }
     }
 
     pub fn debug_print_mem(&self) {

@@ -27,7 +27,7 @@ pub fn main() -> std::io::Result<()> {
     ];
     let offset = 0;
 
-    let user_data = 0xFACADEFACADEFAFA;
+    let user_data = 0xFACA_DEFA_CADE_FAFA;
     let rw_flags = Default::default();
     let mut sqe = uring.new_submission().unwrap();
     unsafe {

@@ -1,8 +1,8 @@
 use bitflags::bitflags;
 
 pub const IORING_OFF_SQ_RING: u64 = 0_u64;
-pub const IORING_OFF_CQ_RING: u64 = 0x8000000_u64;
-pub const IORING_OFF_SQES: u64 = 0x10000000_u64;
+pub const IORING_OFF_CQ_RING: u64 = 0x0800_0000_u64;
+pub const IORING_OFF_SQES: u64 = 0x1000_0000_u64;
 
 const_assert_eq!(16, core::mem::size_of::<CompletionQueueEntry>());
 
@@ -208,19 +208,19 @@ bitflags! {
         /// High priority request, will use poll if possible on block based devices, which ultimately provides
         /// lower latency. The trade off is, the kernel will allocate a thread resource to do the
         /// polling, and so uses more resources. Only usable on files opened with O_DIRECT flag.
-        const HIPRI = 0x00000001;
+        const HIPRI = 0x0000_0001;
         /// Per-IO equivalent of the O_DSYNC open(2) flag.
-        const DSYNC = 0x00000002;
+        const DSYNC = 0x0000_0002;
         /// Per-IO equivalent of the O_SYNC open(2) flag.
-        const SYNC   = 0x00000004;
+        const SYNC   = 0x0000_0004;
         /// Per-IO, returns -EAGAIN if the operation would block, for example when there is no data
         /// immediately available.  If this flag is specified the preadv2() system call will return
         /// instantly if it would need to wait on a lock or the storage device.
-        const NOWAIT = 0x00000008;
+        const NOWAIT = 0x0000_0008;
         /// Per-IO equivalent of the O_APPEND open(2) flag. With this flag, the offset argument
         /// will not affect the write operation, with data always appended to the end of the file.
         /// If the offset argument is -1, then the current file offset is updated.
-        const APPEND = 0x00000010;
+        const APPEND = 0x0000_0010;
 
         const SUPPORTED = 0 | Self::HIPRI.bits | Self::DSYNC.bits | Self::SYNC.bits | Self::NOWAIT.bits | Self::APPEND.bits;
 

@@ -1,5 +1,5 @@
 use std::cell::Cell;
-use std::fs::File;
+
 use std::future::{ Future, };
 use std::task::{ Context, Waker, Poll };
 use std::pin::Pin;
@@ -151,7 +151,7 @@ pub async fn main() -> std::io::Result<()> {
         if completed == 0 {
             std::thread::yield_now();
         } else {
-            let value = task.await?;
+            let _value = task.await?;
             println!("value: {:?}", String::from_utf8(buffer));
             
             // do workl

@@ -232,8 +232,8 @@ mod test {
         );
 
         let test_data: [libc::iovec; 2] = [
-            iovec_from("hello".as_bytes()),
-            iovec_from(", world".as_bytes()),
+            iovec_from(b"hello"),
+            iovec_from(b", world"),
         ];
         // Mutating an entry should update the memory visible to the kernel (no copying mem to the
         // kernel)
@@ -242,9 +242,9 @@ mod test {
             entry.readv(
                 5,
                 FileDescriptor::FD(4),
-                0x10FEEDF00D0FF5E7,
+                0x10FE_EDF0_0D0F_F5E7,
                 ReadWriteFlags::NOWAIT,
-                0xFACADEFACADEFACE,
+                0xFACA_DEFA_CADE_FACE,
                 &test_data,
             );
         }
@@ -253,7 +253,7 @@ mod test {
         assert_eq!(SubmissionEntryFlags::FIXED_FILE.bits(), mem[33]);
         assert_eq!(5, NativeEndian::read_u16(&mem[34..36]));
         assert_eq!(4, NativeEndian::read_i32(&mem[36..40]));
-        assert_eq!(0x10FEEDF00D0FF5E7, NativeEndian::read_u64(&mem[40..48]));
+        assert_eq!(0x10FE_EDF0_0D0F_F5E7, NativeEndian::read_u64(&mem[40..48]));
         assert_eq!(
             test_data.as_ptr() as u64,
             NativeEndian::read_u64(&mem[48..56])
@@ -263,7 +263,7 @@ mod test {
             ReadWriteFlags::NOWAIT.bits(),
             NativeEndian::read_u32(&mem[60..64])
         );
-        assert_eq!(0xFACADEFACADEFACE, NativeEndian::read_u64(&mem[64..72]));
+        assert_eq!(0xFACA_DEFA_CADE_FACE, NativeEndian::read_u64(&mem[64..72]));
     }
 
     #[test]
@@ -286,8 +286,8 @@ mod test {
         );
 
         let buffer: [libc::iovec; 2] = [
-            iovec_from("hello".as_bytes()),
-            iovec_from(", world".as_bytes()),
+            iovec_from(b"hello"),
+            iovec_from(b", world"),
         ];
         // Mutating an entry should update the memory visible to the kernel (no copying mem to the
         // kernel)
@@ -296,9 +296,9 @@ mod test {
             entry.writev(
                 5,
                 FileDescriptor::FD(4),
-                0x10FEEDF00D0FF5E7,
+                0x10FE_EDF0_0D0F_F5E7,
                 ReadWriteFlags::NOWAIT,
-                0xFACADEFACADEFACE,
+                0xFACA_DEFA_CADE_FACE,
                 &buffer,
             );
         }
@@ -307,14 +307,14 @@ mod test {
         assert_eq!(SubmissionEntryFlags::FIXED_FILE.bits(), mem[33]);
         assert_eq!(5, NativeEndian::read_u16(&mem[34..36]));
         assert_eq!(4, NativeEndian::read_i32(&mem[36..40]));
-        assert_eq!(0x10FEEDF00D0FF5E7, NativeEndian::read_u64(&mem[40..48]));
+        assert_eq!(0x10FE_EDF0_0D0F_F5E7, NativeEndian::read_u64(&mem[40..48]));
         assert_eq!(buffer.as_ptr() as u64, NativeEndian::read_u64(&mem[48..56]));
         assert_eq!(2, NativeEndian::read_u32(&mem[56..60]));
         assert_eq!(
             ReadWriteFlags::NOWAIT.bits(),
             NativeEndian::read_u32(&mem[60..64])
         );
-        assert_eq!(0xFACADEFACADEFACE, NativeEndian::read_u64(&mem[64..72]));
+        assert_eq!(0xFACA_DEFA_CADE_FACE, NativeEndian::read_u64(&mem[64..72]));
     }
 
     #[test]
@@ -338,8 +338,8 @@ mod test {
         );
 
         let buffer: [libc::iovec; 2] = [
-            iovec_from("hello".as_bytes()),
-            iovec_from(", world".as_bytes()),
+            iovec_from(b"hello"),
+            iovec_from(b", world"),
         ];
         // Mutating an entry should update the memory visible to the kernel (no copying mem to the
         // kernel)
@@ -348,9 +348,9 @@ mod test {
             entry.writev(
                 5,
                 FileDescriptor::FD(4),
-                0x10FEEDF00D0FF5E7,
+                0x10FE_EDF0_0D0F_F5E7,
                 ReadWriteFlags::NOWAIT,
-                0xFACADEFACADEFACE,
+                0xFACA_DEFA_CADE_FACE,
                 &buffer,
             );
         }
@@ -359,9 +359,9 @@ mod test {
             entry_b.writev(
                 5,
                 FileDescriptor::FD(4),
-                0x10FEEDF00D0FF5E7,
+                0x10FE_EDF0_0D0F_F5E7,
                 ReadWriteFlags::NOWAIT,
-                0xFACADEFACADEFACE,
+                0xFACA_DEFA_CADE_FACE,
                 &buffer,
             );
         }
@@ -370,14 +370,14 @@ mod test {
         assert_eq!(SubmissionEntryFlags::FIXED_FILE.bits(), mem[33]);
         assert_eq!(5, NativeEndian::read_u16(&mem[34..36]));
         assert_eq!(4, NativeEndian::read_i32(&mem[36..40]));
-        assert_eq!(0x10FEEDF00D0FF5E7, NativeEndian::read_u64(&mem[40..48]));
+        assert_eq!(0x10FE_EDF0_0D0F_F5E7, NativeEndian::read_u64(&mem[40..48]));
         assert_eq!(buffer.as_ptr() as u64, NativeEndian::read_u64(&mem[48..56]));
         assert_eq!(2, NativeEndian::read_u32(&mem[56..60]));
         assert_eq!(
             ReadWriteFlags::NOWAIT.bits(),
             NativeEndian::read_u32(&mem[60..64])
         );
-        assert_eq!(0xFACADEFACADEFACE, NativeEndian::read_u64(&mem[64..72]));
+        assert_eq!(0xFACA_DEFA_CADE_FACE, NativeEndian::read_u64(&mem[64..72]));
 
         let offset = core::mem::size_of::<SubmissionQueueEntry>() * 1;
         assert_eq!(Opcode::WRITEV.bits(), mem[32 + offset]);
@@ -385,7 +385,7 @@ mod test {
         assert_eq!(5, NativeEndian::read_u16(&mem[34 + offset..36 + offset]));
         assert_eq!(4, NativeEndian::read_i32(&mem[36 + offset..40 + offset]));
         assert_eq!(
-            0x10FEEDF00D0FF5E7,
+            0x10FE_EDF0_0D0F_F5E7,
             NativeEndian::read_u64(&mem[40 + offset..48 + offset])
         );
         assert_eq!(
@@ -398,7 +398,7 @@ mod test {
             NativeEndian::read_u32(&mem[60 + offset..64 + offset])
         );
         assert_eq!(
-            0xFACADEFACADEFACE,
+            0xFACA_DEFA_CADE_FACE,
             NativeEndian::read_u64(&mem[64 + offset..72 + offset])
         );
 

@@ -1,5 +1,5 @@
 use crate::{
-    CompletedIter, CompletionQueue, CompletionQueueEntry, MappedMemory, SubmissionQueue,
+    CompletedIter, CompletionQueue, MappedMemory, SubmissionQueue,
     SubmissionQueueEntry, SyscallLib, Syscalls,
 };
 use core::pin::Pin;
