@@ -2,7 +2,7 @@ use bitflags::bitflags;
 
 pub const IORING_OFF_SQ_RING: u64 = 0_u64;
 pub const IORING_OFF_CQ_RING: u64 = 0x8000000_u64;
-pub const IORING_OFF_SQES: u64    = 0x10000000_u64;
+pub const IORING_OFF_SQES: u64 = 0x10000000_u64;
 
 const_assert_eq!(16, core::mem::size_of::<CompletionQueueEntry>());
 
@@ -18,7 +18,7 @@ pub struct CompletionQueueEntry {
     pub flags: u32,
 }
 
-const_assert_eq!(40,  core::mem::size_of::<CompletionQueueRingOffsets>());
+const_assert_eq!(40, core::mem::size_of::<CompletionQueueRingOffsets>());
 
 #[repr(C)]
 #[derive(Default, Debug)]
@@ -29,10 +29,10 @@ pub struct CompletionQueueRingOffsets {
     pub ring_entries: u32,
     pub overflow: u32,
     pub completion_queue_entries: u32,
-    pub __reserved: [u64; 2]
+    pub __reserved: [u64; 2],
 }
 
-const_assert_eq!(40,  core::mem::size_of::<SubmissionQueueRingOffsets>());
+const_assert_eq!(40, core::mem::size_of::<SubmissionQueueRingOffsets>());
 
 #[repr(C)]
 #[derive(Default, Debug)]
@@ -48,7 +48,7 @@ pub struct SubmissionQueueRingOffsets {
     pub __resv2: u64,
 }
 
-bitflags!{
+bitflags! {
     #[derive(Default)]
     pub struct SetupFlag: u32 {
         /// The IoContext is polled
@@ -97,9 +97,9 @@ pub struct SetupParameters {
     pub submission_queue_thread_idle: u32,
     pub features: FeatureFlag,
 
-    pub __reserved: [u32;4],
-    pub sq_ring_offsets: SubmissionQueueRingOffsets, 
-    pub cq_ring_offsets: CompletionQueueRingOffsets, 
+    pub __reserved: [u32; 4],
+    pub sq_ring_offsets: SubmissionQueueRingOffsets,
+    pub cq_ring_offsets: CompletionQueueRingOffsets,
 }
 
 impl SetupParameters {
@@ -113,15 +113,18 @@ impl SetupParameters {
     pub fn has_feature(&self, flag: FeatureFlag) -> bool {
         (self.features & flag).bits() != 0
     }
-    
+
     #[inline]
     pub fn submission_queue_bytes(&self) -> usize {
-        (self.sq_ring_offsets.array + self.submission_queue_entries * (core::mem::size_of::<u32>() as u32)) as usize
+        (self.sq_ring_offsets.array
+            + self.submission_queue_entries * (core::mem::size_of::<u32>() as u32)) as usize
     }
 
     #[inline]
     pub fn completion_queue_bytes(&self) -> usize {
-        (self.cq_ring_offsets.completion_queue_entries + self.completion_queue_entries * (core::mem::size_of::<CompletionQueueEntry>() as u32)) as usize
+        (self.cq_ring_offsets.completion_queue_entries
+            + self.completion_queue_entries * (core::mem::size_of::<CompletionQueueEntry>() as u32))
+            as usize
     }
 
     #[inline]
@@ -150,8 +153,8 @@ pub union FileOffset {
 
 #[repr(C)]
 pub union SubmissionOpcodeFlags {
-    /// kernel read/write flag 
-    rw_flag: ReadWriteFlags, 
+    /// kernel read/write flag
+    rw_flag: ReadWriteFlags,
     fsync_flags: FsyncFlags,
     poll_events: u16,
     sync_range_flags: u32,
@@ -206,7 +209,7 @@ bitflags! {
         /// lower latency. The trade off is, the kernel will allocate a thread resource to do the
         /// polling, and so uses more resources. Only usable on files opened with O_DIRECT flag.
         const HIPRI = 0x00000001;
-        /// Per-IO equivalent of the O_DSYNC open(2) flag.  
+        /// Per-IO equivalent of the O_DSYNC open(2) flag.
         const DSYNC = 0x00000002;
         /// Per-IO equivalent of the O_SYNC open(2) flag.
         const SYNC   = 0x00000004;
@@ -228,7 +231,7 @@ bitflags! {
 
 impl From<ReadWriteFlags> for SubmissionOpcodeFlags {
     fn from(rw_flag: ReadWriteFlags) -> Self {
-        Self { rw_flag, }
+        Self { rw_flag }
     }
 }
 
@@ -270,21 +273,30 @@ impl SubmissionQueueEntry {
     }
 
     #[inline]
-    fn iov(&mut self, op: Opcode, priority: IOPriority, fd: FileDescriptor, offset: u64, flags: ReadWriteFlags, user_data: u64, iov: *const [libc::iovec]) {
+    fn iov(
+        &mut self,
+        op: Opcode,
+        priority: IOPriority,
+        fd: FileDescriptor,
+        offset: u64,
+        flags: ReadWriteFlags,
+        user_data: u64,
+        iov: *const [libc::iovec],
+    ) {
         unsafe { self.clear() };
         self.opcode = op;
         self.flags = Default::default();
         match fd {
             FileDescriptor::FD(standard_fd) => {
                 self.fd = standard_fd;
-            },
+            }
             FileDescriptor::RegisteredIndex(index) => {
                 self.flags |= SubmissionEntryFlags::FIXED_FILE;
                 self.fd = index as i32;
             }
         };
         self.io_priority = priority;
-        self.offset = FileOffset { offset, };
+        self.offset = FileOffset { offset };
         self.addr = unsafe { (*iov).as_ptr() } as usize as u64;
         self.len = unsafe { (*iov).len() } as u32;
         self.opcode_flags = flags.into();
@@ -292,12 +304,27 @@ impl SubmissionQueueEntry {
         self.buffer_index.index = 0;
     }
 
-    pub fn readv(&mut self, priority: IOPriority, fd: FileDescriptor, offset: u64, flags: ReadWriteFlags, user_data: u64, iov: *const [libc::iovec]) {
+    pub fn readv(
+        &mut self,
+        priority: IOPriority,
+        fd: FileDescriptor,
+        offset: u64,
+        flags: ReadWriteFlags,
+        user_data: u64,
+        iov: *const [libc::iovec],
+    ) {
         self.iov(Opcode::READV, priority, fd, offset, flags, user_data, iov)
     }
 
-    pub fn writev(&mut self, priority: IOPriority, fd: FileDescriptor, offset: u64, flags: ReadWriteFlags, user_data: u64, iov: *const [libc::iovec]) {
+    pub fn writev(
+        &mut self,
+        priority: IOPriority,
+        fd: FileDescriptor,
+        offset: u64,
+        flags: ReadWriteFlags,
+        user_data: u64,
+        iov: *const [libc::iovec],
+    ) {
         self.iov(Opcode::WRITEV, priority, fd, offset, flags, user_data, iov)
     }
-    
 }

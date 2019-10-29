@@ -5,64 +5,32 @@
 extern crate static_assertions;
 
 mod contiguous_mem;
-pub(crate) use contiguous_mem::{
-    ContiguousMem,
-};
+pub(crate) use contiguous_mem::ContiguousMem;
 
 mod completion_queue;
-pub use completion_queue::{
-    CompletedIter,
-    CompletionQueue,
-};
+pub use completion_queue::{CompletedIter, CompletionQueue};
 
 // External library API (pub use)
 pub(crate) mod io_uring;
-pub use io_uring::{ 
-    IORING_OFF_SQ_RING,
-    IORING_OFF_CQ_RING,
-    IORING_OFF_SQES,
-    CompletionQueueEntry,
-    CompletionQueueRingOffsets,
-    EnterFlag,
-    FeatureFlag,
-    FileDescriptor,
-    IOPriority,
-    Opcode,
-    ReadWriteFlags,
-    SetupFlag,
-    SetupParameters, 
-    SubmissionEntryFlags,
-    SubmissionQueueEntry,
-    SubmissionQueueFlag,
-    SubmissionQueueRingOffsets,
+pub use io_uring::{
+    CompletionQueueEntry, CompletionQueueRingOffsets, EnterFlag, FeatureFlag, FileDescriptor,
+    IOPriority, Opcode, ReadWriteFlags, SetupFlag, SetupParameters, SubmissionEntryFlags,
+    SubmissionQueueEntry, SubmissionQueueFlag, SubmissionQueueRingOffsets, IORING_OFF_CQ_RING,
+    IORING_OFF_SQES, IORING_OFF_SQ_RING,
 };
 
 //TODO: until the stuff in the io_uring module is moved out, then this mod is named without the 'u'
 mod io_ring;
-pub use io_ring::{
-    IoUring,
-    Uring,
-};
+pub use io_ring::{IoUring, Uring};
 
 mod io_uring_builder;
-pub use io_uring_builder::{
-    IoUringBuilder,
-};
+pub use io_uring_builder::IoUringBuilder;
 
 pub(crate) mod mmap;
-pub use mmap::{
-    MappedMemory,
-};
-
+pub use mmap::MappedMemory;
 
 mod submission_queue;
-pub use submission_queue::{
-    SubmissionQueue,
-};
+pub use submission_queue::SubmissionQueue;
 
 mod syscall;
-pub use syscall::{
-    Syscalls,
-    SyscallLib,
-};
-
+pub use syscall::{SyscallLib, Syscalls};

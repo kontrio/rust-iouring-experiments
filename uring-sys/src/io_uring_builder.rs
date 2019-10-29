@@ -1,18 +1,8 @@
-use core::ops::DerefMut;
 use crate::{
-    IORING_OFF_SQ_RING,
-    IORING_OFF_CQ_RING,
-    IORING_OFF_SQES,
-    CompletionQueue,
-    FeatureFlag,
-    IoUring,
-    MappedMemory,
-    SetupFlag,
-    SetupParameters,
-    SubmissionQueue,
-    SyscallLib,
-    Syscalls,
+    CompletionQueue, FeatureFlag, IoUring, MappedMemory, SetupFlag, SetupParameters,
+    SubmissionQueue, SyscallLib, Syscalls, IORING_OFF_CQ_RING, IORING_OFF_SQES, IORING_OFF_SQ_RING,
 };
+use core::ops::DerefMut;
 
 #[derive(Default)]
 pub struct IoUringBuilder {
@@ -37,7 +27,6 @@ impl IoUringBuilder {
 
     /// The kernel will create a thread to poll the submission queue
     pub fn with_submission_queue_kernel_poller(mut self, option: bool) -> Self {
-
         if option {
             self.flags |= SetupFlag::SQ_POLL;
         } else {
@@ -84,13 +73,15 @@ impl IoUringBuilder {
         if uring_fd < 0 {
             //TODO: real errors
             return Err(uring_fd);
-        }     
+        }
 
         Self::do_mmapping(uring_fd, &setup_parameters)
     }
 
-    fn do_mmapping(uring_fd: i32, setup_params: &SetupParameters) -> Result<IoUring<Syscalls>, i32> {
-
+    fn do_mmapping(
+        uring_fd: i32,
+        setup_params: &SetupParameters,
+    ) -> Result<IoUring<Syscalls>, i32> {
         let mut submission_queue_bytes = setup_params.submission_queue_bytes();
         let mut completion_queue_bytes = setup_params.completion_queue_bytes();
 
@@ -102,35 +93,45 @@ impl IoUringBuilder {
             completion_queue_bytes = core::cmp::max(completion_queue_bytes, submission_queue_bytes);
             submission_queue_bytes = completion_queue_bytes;
         }
-        
+
         let submission_queue_entries_bytes = setup_params.submission_queue_entries_bytes();
 
-        let sq_memory   = MappedMemory::map(uring_fd, IORING_OFF_SQ_RING, submission_queue_bytes)?;
-        let sqes_memory = MappedMemory::map(uring_fd, IORING_OFF_SQES, submission_queue_entries_bytes)?;
+        let sq_memory = MappedMemory::map(uring_fd, IORING_OFF_SQ_RING, submission_queue_bytes)?;
+        let sqes_memory =
+            MappedMemory::map(uring_fd, IORING_OFF_SQES, submission_queue_entries_bytes)?;
 
         let submission_queue: SubmissionQueue<MappedMemory, Syscalls> = SubmissionQueue::new(
             submission_queue_entries_bytes,
             uring_fd,
             &sq_memory,
             sqes_memory,
-            setup_params); 
+            setup_params,
+        );
 
         let cq_memory = if has_single_mmap_feature {
             None
         } else {
-            let cq_memory = MappedMemory::map(uring_fd, IORING_OFF_CQ_RING, completion_queue_bytes)?;
+            let cq_memory =
+                MappedMemory::map(uring_fd, IORING_OFF_CQ_RING, completion_queue_bytes)?;
             Some(cq_memory)
         };
 
         let completion_queue = CompletionQueue::new(
             completion_queue_bytes,
             match cq_memory {
-                Some(ref inner) => inner,     
+                Some(ref inner) => inner,
                 // share the submission queue memory in single mmap mode
                 None => &sq_memory,
             },
-            setup_params);
+            setup_params,
+        );
 
-        Ok(IoUring::new(uring_fd, submission_queue, completion_queue, sq_memory, cq_memory))
+        Ok(IoUring::new(
+            uring_fd,
+            submission_queue,
+            completion_queue,
+            sq_memory,
+            cq_memory,
+        ))
     }
 }

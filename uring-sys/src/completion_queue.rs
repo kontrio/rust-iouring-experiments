@@ -1,9 +1,5 @@
+use crate::{CompletionQueueEntry, MappedMemory, SetupParameters};
 use core::pin::Pin;
-use crate::{
-    CompletionQueueEntry,
-    MappedMemory,
-    SetupParameters,
-};
 
 #[derive(Debug)]
 pub struct CompletionQueue {
@@ -17,8 +13,8 @@ pub struct CompletionQueue {
     k_completion_queue_entries: *mut u32,
 
     // This is used for iterating over the completion entries without copying.
-    // If we were to update k_head while iterating it's possible that the kernel 
-    // could overwrite the data that we're reading, 
+    // If we were to update k_head while iterating it's possible that the kernel
+    // could overwrite the data that we're reading,
     // instead we keep track of _our_ head, and flush it to the kernel when we're
     // done reading.
     head: u32,
@@ -26,7 +22,7 @@ pub struct CompletionQueue {
     size: usize,
 }
 
-pub struct CompletedIter<'a>(&'a mut CompletionQueue); 
+pub struct CompletedIter<'a>(&'a mut CompletionQueue);
 
 impl<'a> Iterator for CompletedIter<'a> {
     type Item = Pin<&'a CompletionQueueEntry>;
@@ -37,7 +33,12 @@ impl<'a> Iterator for CompletedIter<'a> {
         } else {
             let index = self.0.head & self.0.k_ring_mask;
             let mem_offset = index as usize * core::mem::size_of::<CompletionQueueEntry>();
-            let cqe = unsafe { self.0.k_completion_queue_entries.offset(mem_offset as isize) as usize as *mut CompletionQueueEntry };
+            let cqe = unsafe {
+                self.0
+                    .k_completion_queue_entries
+                    .offset(mem_offset as isize) as usize
+                    as *mut CompletionQueueEntry
+            };
             self.0.head = self.0.head.wrapping_add(1);
 
             if cqe == core::ptr::null_mut() {
@@ -57,19 +58,18 @@ impl Drop for CompletedIter<'_> {
 }
 
 impl CompletionQueue {
-    pub fn new(
-        size_bytes: usize, 
-        cq_memory: &MappedMemory, 
-        params: &SetupParameters) -> Self { 
-
+    pub fn new(size_bytes: usize, cq_memory: &MappedMemory, params: &SetupParameters) -> Self {
         CompletionQueue {
-            k_head:         cq_memory.get_offset(params.cq_ring_offsets.head as usize),
-            k_tail:         cq_memory.get_offset(params.cq_ring_offsets.tail as usize),
+            k_head: cq_memory.get_offset(params.cq_ring_offsets.head as usize),
+            k_tail: cq_memory.get_offset(params.cq_ring_offsets.tail as usize),
             // The kernel code and docs suggest this is always constant (entries - 1)
-            k_ring_mask:    unsafe { *cq_memory.get_offset(params.cq_ring_offsets.ring_mask as usize) },
+            k_ring_mask: unsafe {
+                *cq_memory.get_offset(params.cq_ring_offsets.ring_mask as usize)
+            },
             k_ring_entries: cq_memory.get_offset(params.cq_ring_offsets.ring_entries as usize),
-            k_overflow:     cq_memory.get_offset(params.cq_ring_offsets.overflow as usize),
-            k_completion_queue_entries: cq_memory.get_offset(params.cq_ring_offsets.completion_queue_entries as usize),
+            k_overflow: cq_memory.get_offset(params.cq_ring_offsets.overflow as usize),
+            k_completion_queue_entries: cq_memory
+                .get_offset(params.cq_ring_offsets.completion_queue_entries as usize),
             head: 0,
             size: size_bytes, //  TODO: is this set by us from params or kernel?
         }
@@ -83,7 +83,6 @@ impl CompletionQueue {
         CompletedIter(self)
     }
 }
-
 
 //TODO: Could we use AtomicU32?..
 fn load_acquire<T>(ptr: *const T) -> T {

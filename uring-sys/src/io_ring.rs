@@ -1,14 +1,8 @@
-use core::pin::Pin;
 use crate::{
-    CompletedIter,
-    CompletionQueue,
-    CompletionQueueEntry,
-    MappedMemory,
-    SubmissionQueue,
-    SubmissionQueueEntry,
-    Syscalls,
-    SyscallLib,
+    CompletedIter, CompletionQueue, CompletionQueueEntry, MappedMemory, SubmissionQueue,
+    SubmissionQueueEntry, SyscallLib, Syscalls,
 };
+use core::pin::Pin;
 
 pub type Uring = IoUring<Syscalls>;
 
@@ -32,8 +26,8 @@ impl<S: SyscallLib> IoUring<S> {
         submission_queue: SubmissionQueue<MappedMemory, S>,
         completion_queue: CompletionQueue,
         _sq_memory: MappedMemory,
-        _cq_memory: Option<MappedMemory>) -> Self {
-
+        _cq_memory: Option<MappedMemory>,
+    ) -> Self {
         Self {
             submission_queue,
             completion_queue,
